@@ -17,14 +17,14 @@ ymin, ymax =  -1.5,1.5
 #xmin, xmax = -0.7436438870576386, -0.7436438870166787
 #ymin, ymax = 0.1318259041848326, 0.1318259042257926
 
-xsize  = 16
-ysize = 16
+xsize  = 1024
+ysize = 1024
 #ysize = int(xsize / (xmax - xmin) * (ymax - ymin))
 
 maxit, col = 200, 50
 
 stops = np.array([ 0.0, 0.33, 0.66, 1.0])
-colArr = np.array([[0, 0, 0, 1], [1, 0, 0, 1], [1, .6, 0, 1], [0,0,0, 1]])
+colArr = np.array([[0, 0, 0, 1], [1, 0, 0, 1], [1, .6, 0, 1], [0, 0, 0, 1]])
 colMap = pg.ColorMap(stops, colArr)
 lut = colMap.getLookupTable(0.0, 1.0, col)
 
@@ -44,8 +44,6 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.ip = pg.ImageItem(border = 'w')
         self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
         self.ip.setLookupTable(lut)
-        print(self.data.reshape((ysize, xsize)))
-        print(np.max(self.data), np.min(self.data))
         
         # Add view box
         view = self.addViewBox()

@@ -6,21 +6,10 @@
 inline __m128i modps_epi32(__m128 x, __m128 col)
     {
     __m128 div = _mm_div_ps(x,col);
-    for(int l = 0; l < 4; l++)
-        printf("%f, ", div[l]);
-    printf("\n");
-    __m128 res = _mm_cvtepi32_ps(_mm_cvtps_epi32(div));
-    for(int l = 0; l < 4; l++)
-        printf("%f, ", res[l]);
-    printf("\n");
+    __m128 res = _mm_round_ps(div,_MM_FROUND_TO_ZERO);
     res = _mm_mul_ps(res,col);
-    for(int l = 0; l < 4; l++)
-        printf("%f, ", res[l]);
-    printf("\n");
     res = _mm_sub_ps(x,res);
-    for(int l = 0; l < 4; l++)
-        printf("%f, ", res[l]);
-    printf("\n");
+
     return _mm_cvtps_epi32(res);
     }
 
@@ -77,15 +66,7 @@ void iterate(double xmin, double xmax, double ymin, double ymax, int xsize, int 
                 counter = _mm256_add_pd(counter,which);
                 }
             while((test != 0) && (++k < maxit));
-            
-//            for(int l = 0; l < 4; l++)
-//                printf("%.0f, ", counter[l]);
-//            printf("; ");
-//            __m128i tmp = modps_epi32(_mm256_cvtpd_ps(counter),vcol);
-//            for(int l = 0; l < 4; l++)
-//                printf("%i, ", tmp[l]);
-//            printf("\n");
-            
+
             _mm_store_si128((__m128i*)(image + ywidth + 4*i),modps_epi32(_mm256_cvtpd_ps(counter),vcol));
             }
         }
