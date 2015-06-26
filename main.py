@@ -42,7 +42,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         
         # Create image item
         self.ip = pg.ImageItem(border = 'w')
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
         self.ip.setLookupTable(lut)
         
         # Add view box
@@ -57,50 +57,50 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         st = time()
         self.fractal = Mandel(xsize, ysize, xmin, xmax, ymin, ymax, maxit, col, self.data)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def zoomIn(self):
         st = time()
         self.fractal.zoom(.5)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def zoomOut(self):
         st = time()
         self.fractal.zoom(2.0)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def moveL(self):
         st = time()
         self.fractal.moveL(xsize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def moveR(self):
         st = time()
         self.fractal.moveR(xsize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def moveD(self):
         st = time()
         self.fractal.moveD(ysize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def moveU(self):
         st = time()
         self.fractal.moveU(ysize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
     
     def setMaxIt(self):
         m = int(input("Please set number of iterations to check:\n"))
         st = time()
         self.fractal.setMaxIt(m)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1])
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
 
 
 # Main window, to have file menu & statusbar

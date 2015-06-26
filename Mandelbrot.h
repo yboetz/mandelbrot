@@ -28,7 +28,7 @@ void iterate(double xmin, double xmax, double ymin, double ymax, int xsize, int 
     __m256d two = _mm256_set1_pd(2.0);
     __m256d four = _mm256_set1_pd(4.0);
     
-//    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for(int j = 0; j < ysize; j++)
         {
         __m256d cim = _mm256_fmadd_pd(_mm256_set1_pd(j),vdy,vymax);
