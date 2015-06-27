@@ -35,14 +35,12 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.init()
      
     def init(self):
+        # Array to hold iteration count for each pixel
         self.data = np.zeros(xsize*ysize,dtype = np.int32)
-        st = time()
-        self.fractal = Mandel(xsize, ysize, xmin, xmax, ymin, ymax, maxit, col, self.data)
-        print("Image calculated in %.6f s" %(time() - st))
         
         # Create image item
         self.ip = pg.ImageItem(border = 'w')
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.createFractal()
         self.ip.setLookupTable(lut)
         
         # Add view box
@@ -53,7 +51,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         # Add image item to widget
         view.addItem(self.ip)
     
-    def resetInitial(self):
+    def createFractal(self):
         st = time()
         self.fractal = Mandel(xsize, ysize, xmin, xmax, ymin, ymax, maxit, col, self.data)
         print("Image calculated in %.6f s" %(time() - st))
@@ -129,7 +127,7 @@ class MainWindow(QtGui.QMainWindow):
         fileMenu.addAction(closeApp)
         # Defines which function to call at what keypress
         self.keyList = {
-                        QtCore.Qt.Key_R: self.window.resetInitial,
+                        QtCore.Qt.Key_R: self.window.createFractal,
                         QtCore.Qt.Key_E: self.window.zoomIn,
                         QtCore.Qt.Key_Q: self.window.zoomOut,
                         QtCore.Qt.Key_A: self.window.moveL,
