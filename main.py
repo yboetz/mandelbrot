@@ -19,10 +19,12 @@ ymin, ymax =  -1.5,1.5
 
 xsize  = 1024
 ysize = 1024
-#ysize = int(xsize / (xmax - xmin) * (ymax - ymin))
+#xsize = int(ysize / (ymax - ymin) * (xmax - xmin))
 
-maxit, col = 200, 50
+# Max iterations & number of colors
+maxit, col = 200, 200
 
+# Generate look up table
 stops = np.linspace(0,1,5)
 colArr = np.array([[0, 0, 0, 1],[1, 0, 0, 1],[1, 1, 0, 1],[1, 0, 0, 1],[0, 0, 0, 1]], dtype = np.float32)
 colMap = pg.ColorMap(stops, colArr)
@@ -32,9 +34,7 @@ lut = colMap.getLookupTable(0.0, 1.0, col)
 class FractalWidget(pg.GraphicsLayoutWidget):
     def __init__(self):
         super(FractalWidget, self).__init__()
-        self.init()
-     
-    def init(self):
+        
         # Array to hold iteration count for each pixel
         self.data = np.zeros(xsize*ysize, dtype = np.int32)
         
@@ -44,9 +44,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.createFractal()
         
         # Add view box
-        view = self.addViewBox(enableMouse = False, enableMenu = False, invertY = True)
-        view.setAspectLocked(lock=True, ratio = ysize/xsize)
-        
+        view = self.addViewBox(lockAspect = True, enableMouse = False, enableMenu = False, invertY = True)
         # Add image item to widget
         view.addItem(self.ip)
         
@@ -105,7 +103,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
     # Takes mouse click and zooms in or out at position
     def mouseEvent(self, e):
         pos = self.ip.mapFromScene(e.scenePos())
-        if 0 > pos.x() or xsize < pos.x() or 0 > pos.y() or ysize < pos.y():
+        if not (0 < pos.x() < xsize) or not (0 < pos.y() < ysize):
             return
         self.fractal.setExtent(pos.x(), pos.y())
         if e.button() == 1:
