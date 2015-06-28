@@ -89,6 +89,7 @@ class Mandelbrot
         void moveR(int);
         void moveD(int);
         void moveU(int);
+        void setExtent(double,double);
     };
 
 Mandelbrot::Mandelbrot(int x, int y, double xmi, double xma, double ymi, double yma, int max, int c, int* img)
@@ -278,4 +279,17 @@ void Mandelbrot::moveU(int step)
         }
     
     delete[] tmp;
+    }
+// Sets new extent. x & y are pixel positions measured from top left, increasing to the right and down
+void Mandelbrot::setExtent(double x, double y)
+    {
+    double xscale = (xmax - xmin);
+    double yscale = (ymax - ymin);
+    double xMiddle = xmin + xscale / xsize * x;
+    double yMiddle = ymax - yscale / ysize * y;
+
+    xmin = xMiddle - 0.5 * xscale;
+    xmax = xMiddle + 0.5 * xscale;
+    ymin = yMiddle - 0.5 * yscale;
+    ymax = yMiddle + 0.5 * yscale;
     }

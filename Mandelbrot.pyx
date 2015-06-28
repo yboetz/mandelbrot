@@ -12,6 +12,7 @@ cdef extern from "Mandelbrot.h":
         void moveR(int)
         void moveD(int)
         void moveU(int)
+        void setExtent(double,double)
    
 
 cdef class Mandel:
@@ -44,3 +45,6 @@ cdef class Mandel:
     
     def moveU(self, int step):
         self.thisptr.moveU(step)
+    
+    def setExtent(self, double x, double y):
+        self.thisptr.setExtent(x,y)

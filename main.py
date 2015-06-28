@@ -23,8 +23,8 @@ ysize = 1024
 
 maxit, col = 200, 50
 
-stops = np.array([ 0.0, 0.33, 0.66, 1.0])
-colArr = np.array([[0, 0, 0, 1], [1, 0, 0, 1], [1, .6, 0, 1], [0, 0, 0, 1]])
+stops = np.linspace(0,1,5)
+colArr = np.array([[0, 0, 0, 1],[1, 0, 0, 1],[1, 1, 0, 1],[1, 0, 0, 1],[0, 0, 0, 1]], dtype = np.float32)
 colMap = pg.ColorMap(stops, colArr)
 lut = colMap.getLookupTable(0.0, 1.0, col)
 
@@ -36,69 +36,82 @@ class FractalWidget(pg.GraphicsLayoutWidget):
      
     def init(self):
         # Array to hold iteration count for each pixel
-        self.data = np.zeros(xsize*ysize,dtype = np.int32)
+        self.data = np.zeros(xsize*ysize, dtype = np.int32)
         
         # Create image item
         self.ip = pg.ImageItem(border = 'w')
-        self.createFractal()
         self.ip.setLookupTable(lut)
+        self.createFractal()
         
         # Add view box
-        view = self.addViewBox()
-        view.setMouseEnabled(x=False, y=False)
+        view = self.addViewBox(enableMouse = False, enableMenu = False, invertY = True)
         view.setAspectLocked(lock=True, ratio = ysize/xsize)
         
         # Add image item to widget
         view.addItem(self.ip)
+        
+        # Connect mouse click event to function mouseEvent
+        self.scene().sigMouseClicked.connect(self.mouseEvent)
     
     def createFractal(self):
         st = time()
         self.fractal = Mandel(xsize, ysize, xmin, xmax, ymin, ymax, maxit, col, self.data)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def zoomIn(self):
         st = time()
         self.fractal.zoom(.5)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def zoomOut(self):
         st = time()
         self.fractal.zoom(2.0)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def moveL(self):
         st = time()
         self.fractal.moveL(xsize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def moveR(self):
         st = time()
         self.fractal.moveR(xsize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def moveD(self):
         st = time()
         self.fractal.moveD(ysize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def moveU(self):
         st = time()
         self.fractal.moveU(ysize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
     
     def setMaxIt(self):
         m = int(input("Please set number of iterations to check:\n"))
         st = time()
         self.fractal.setMaxIt(m)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose()[:,::-1], levels = (0,col))
+        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+    
+    # Takes mouse click and zooms in or out at position
+    def mouseEvent(self, e):
+        pos = self.ip.mapFromScene(e.scenePos())
+        if 0 > pos.x() or xsize < pos.x() or 0 > pos.y() or ysize < pos.y():
+            return
+        self.fractal.setExtent(pos.x(), pos.y())
+        if e.button() == 1:
+            self.zoomIn()
+        elif e.button() == 2:
+            self.zoomOut()
 
 
 # Main window, to have file menu & statusbar
@@ -135,7 +148,8 @@ class MainWindow(QtGui.QMainWindow):
                         QtCore.Qt.Key_S: self.window.moveD,
                         QtCore.Qt.Key_W: self.window.moveU
                         }
-
+    
+    # Empty function to call if any other key is pressed
     def doNothing(self):
         pass
 
