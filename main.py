@@ -105,11 +105,10 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         pos = self.ip.mapFromScene(e.scenePos())
         if not (0 < pos.x() < xsize) or not (0 < pos.y() < ysize):
             return
-        self.fractal.setExtent(pos.x(), pos.y())
-        if e.button() == 1:
-            self.zoomIn()
-        elif e.button() == 2:
-            self.zoomOut()
+        bts = {1:self.zoomIn, 2:self.zoomOut}
+        if e.button() in bts:
+            self.fractal.setExtent(pos.x(), pos.y())
+            bts.get(e.button())()
 
 
 # Main window, to have file menu & statusbar
