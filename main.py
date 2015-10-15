@@ -30,6 +30,20 @@ colArr = np.array([[0, 0, 0, 1],[1, 0, 0, 1],[1, 1, 0, 1],[1, 0, 0, 1],[0, 0, 0,
 colMap = pg.ColorMap(stops, colArr)
 lut = colMap.getLookupTable(0.0, 1.0, col)
 
+with open('viridis','r') as file:
+    x = []
+    for line in file:
+        x.append(list(map(float,line.split())))
+    x.extend(x[::-1])
+    virMap = np.ones((len(x),4), dtype = np.float32)
+    virMap[:,:3] = x
+    del x
+
+stops = np.linspace(0,1,virMap.shape[0])
+colMap = pg.ColorMap(stops, virMap)
+lut = colMap.getLookupTable(0.0, 1.0, col)
+
+
 # GraphicsLayoutWidget class with controls & fractal data
 class FractalWidget(pg.GraphicsLayoutWidget):
     def __init__(self):
