@@ -53,7 +53,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         
         # Create image item
         self.ip = pg.ImageItem(border = 'w')
-        self.ip.setLookupTable(lut)
+        self.ip.setLookupTable(lut, update = False)
         self.createFractal()
         
         # Add view box

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <immintrin.h>
 #include <chrono>
+#include <vector>
 
 
 inline __m128i modps_epi32(__m128 x, __m128 col)
@@ -80,6 +81,7 @@ class Mandelbrot
         double xmin, xmax, ymin, ymax;
         int maxit, col;
         int* image;
+        std::vector<int> tmp_image;
         
         Mandelbrot(int, int, double, double, double, double, int, int, int*);
         void setMaxIt(int);
@@ -143,9 +145,9 @@ void Mandelbrot::moveL(int step)
     xmin -= dx;
     xmax -= dx;
     
-    int* tmp = new int[ysize * stepSize];
+    tmp_image.reserve(ysize*stepSize);
     
-    iterate(xmin, xmin + dx, ymin, ymax, stepSize, ysize, maxit, col, tmp);
+    iterate(xmin, xmin + dx, ymin, ymax, stepSize, ysize, maxit, col, tmp_image.data());
     
     int xstep = xsize/4 - step + 1;
     for(int j = 0; j < ysize; j++)
@@ -159,11 +161,10 @@ void Mandelbrot::moveL(int step)
         for(int i = 0; i < step; i++)
             {
             int _i = 4*i;
-            _mm_store_si128((__m128i*)(image + ywidth + _i), _mm_load_si128((__m128i*)(tmp + j*stepSize + _i)));
+            _mm_store_si128((__m128i*)(image + ywidth + _i), _mm_load_si128((__m128i*)(tmp_image.data() + j*stepSize + _i)));
             }
         }
     
-    delete[] tmp;
     }
 
 void Mandelbrot::moveR(int step)
@@ -177,9 +178,9 @@ void Mandelbrot::moveR(int step)
     xmin += dx;
     xmax += dx;
     
-    int* tmp = new int[ysize * stepSize];
+    tmp_image.reserve(ysize*stepSize);
     
-    iterate(xmax - dx, xmax, ymin, ymax, stepSize, ysize, maxit, col, tmp);
+    iterate(xmax - dx, xmax, ymin, ymax, stepSize, ysize, maxit, col, tmp_image.data());
     
     int xstep = xsize/4 - step;
     for(int j = 0; j < ysize; j++)
@@ -193,11 +194,10 @@ void Mandelbrot::moveR(int step)
         for(int i = xstep; i < xstep + step; i++)
             {
             int _i = 4*i;
-            _mm_store_si128((__m128i*)(image + _j + _i), _mm_load_si128((__m128i*)(tmp + j*stepSize + _i - xsize + stepSize)));
+            _mm_store_si128((__m128i*)(image + _j + _i), _mm_load_si128((__m128i*)(tmp_image.data() + j*stepSize + _i - xsize + stepSize)));
             }
         }
-    
-    delete[] tmp;
+
     }
 
 void Mandelbrot::moveD(int step)
@@ -211,9 +211,9 @@ void Mandelbrot::moveD(int step)
     ymin -= dy;
     ymax -= dy;
     
-    int* tmp = new int[xsize * stepSize];
+    tmp_image.reserve(xsize*stepSize);
     
-    iterate(xmin, xmax, ymin, ymin + dy, xsize, stepSize, maxit, col, tmp);
+    iterate(xmin, xmax, ymin, ymin + dy, xsize, stepSize, maxit, col, tmp_image.data());
     
     int xstep = xsize/4;
     int ystep = ysize - stepSize;
@@ -234,11 +234,10 @@ void Mandelbrot::moveD(int step)
         for(int i = 0; i < xstep; i++)
             {
             int _i = 4*i;
-            _mm_store_si128((__m128i*)(image + _j + _i), _mm_load_si128((__m128i*)(tmp + _j - stepWidthtmp + _i)));
+            _mm_store_si128((__m128i*)(image + _j + _i), _mm_load_si128((__m128i*)(tmp_image.data() + _j - stepWidthtmp + _i)));
             }
         }
     
-    delete[] tmp;
     }
 
 void Mandelbrot::moveU(int step)
@@ -252,9 +251,9 @@ void Mandelbrot::moveU(int step)
     ymin += dy;
     ymax += dy;
     
-    int* tmp = new int[xsize * stepSize];
+    tmp_image.reserve(xsize*stepSize);
     
-    iterate(xmin, xmax, ymax - dy, ymax, xsize, stepSize, maxit, col, tmp);
+    iterate(xmin, xmax, ymax - dy, ymax, xsize, stepSize, maxit, col, tmp_image.data());
     
     int xstep = xsize/4;
     int ystep = ysize - stepSize + 1;
@@ -274,11 +273,10 @@ void Mandelbrot::moveU(int step)
         for(int i = 0; i < xstep; i++)
             {
             int _i = 4*i;
-            _mm_store_si128((__m128i*)(image + _j + _i), _mm_load_si128((__m128i*)(tmp + _j + _i)));
+            _mm_store_si128((__m128i*)(image + _j + _i), _mm_load_si128((__m128i*)(tmp_image.data() + _j + _i)));
             }
         }
     
-    delete[] tmp;
     }
 // Sets new extent. x & y are pixel positions measured from top left, increasing to the right and down
 void Mandelbrot::setExtent(double x, double y)
