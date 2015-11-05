@@ -11,7 +11,6 @@ from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 from time import time
 
-
 xmin, xmax = -2,1
 ymin, ymax =  -1.5,1.5
 #xmin, xmax = -0.7436438870576386, -0.7436438870166787
@@ -64,6 +63,38 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         
         # Connect mouse click event to function mouseEvent
         self.scene().sigMouseClicked.connect(self.mouseEvent)
+        
+        # Dictionary with functions to call at keypress
+        self.keyList = {
+                        QtCore.Qt.Key_R: self.createFractal,
+                        QtCore.Qt.Key_E: self.zoomIn,
+                        QtCore.Qt.Key_Q: self.zoomOut,
+                        QtCore.Qt.Key_A: self.moveL,
+                        QtCore.Qt.Key_D: self.moveR,
+                        QtCore.Qt.Key_S: self.moveD,
+                        QtCore.Qt.Key_W: self.moveU
+                        }
+    
+    # Empty function to call if any other key is pressed
+    def doNothing(self):
+        pass
+    
+    # Calls function according to pressed key
+    def keyPressEvent(self, e):
+        if e.isAutoRepeat():
+            pass
+        else:
+            self.keyList.get(e.key(), self.doNothing)()
+    
+    # Takes mouse click and zooms in or out at position
+    def mouseEvent(self, e):
+        pos = self.ip.mapFromScene(e.scenePos())
+        if not (0 < pos.x() < xsize) or not (0 < pos.y() < ysize):
+            return
+        bts = {1:self.zoomIn, 2:self.zoomOut}
+        if e.button() in bts:
+            self.fractal.setExtent(pos.x(), pos.y())
+            bts.get(e.button())()
     
     def createFractal(self):
         st = time()
@@ -113,16 +144,6 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.fractal.setMaxIt(m)
         print("Image calculated in %.6f s" %(time() - st))
         self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
-    
-    # Takes mouse click and zooms in or out at position
-    def mouseEvent(self, e):
-        pos = self.ip.mapFromScene(e.scenePos())
-        if not (0 < pos.x() < xsize) or not (0 < pos.y() < ysize):
-            return
-        bts = {1:self.zoomIn, 2:self.zoomOut}
-        if e.button() in bts:
-            self.fractal.setExtent(pos.x(), pos.y())
-            bts.get(e.button())()
 
 
 # Main window, to have file menu & statusbar
@@ -137,7 +158,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('Mandelbrot')
         
         self.window = FractalWidget()
-        self.window.keyPressEvent = self.keyPressEvent
+#        self.keyPressEvent = self.window.keyPressEvent
         self.setCentralWidget(self.window)
 #        self.statusBar()
         # Menubar entries
@@ -150,26 +171,6 @@ class MainWindow(QtGui.QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(closeApp)
         # Defines which function to call at what keypress
-        self.keyList = {
-                        QtCore.Qt.Key_R: self.window.createFractal,
-                        QtCore.Qt.Key_E: self.window.zoomIn,
-                        QtCore.Qt.Key_Q: self.window.zoomOut,
-                        QtCore.Qt.Key_A: self.window.moveL,
-                        QtCore.Qt.Key_D: self.window.moveR,
-                        QtCore.Qt.Key_S: self.window.moveD,
-                        QtCore.Qt.Key_W: self.window.moveU
-                        }
-    
-    # Empty function to call if any other key is pressed
-    def doNothing(self):
-        pass
-
-    # Calls function according to pressed key
-    def keyPressEvent(self, e):
-        if e.isAutoRepeat():
-            pass
-        else:
-            self.keyList.get(e.key(), self.doNothing)()
 
 
 if __name__ == "__main__":
