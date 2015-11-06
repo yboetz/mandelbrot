@@ -41,9 +41,12 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         super(FractalWidget, self).__init__()
         
         self.xsize, self.ysize = 1024, 1024
-        self.xmin, self.xmax = -2,1
-        self.ymin, self.ymax =  -1.5,1.5
+        self.xmin, self.xmax = -2, 1
+        self.ymin, self.ymax =  -1.5, 1.5
         self.maxit, self.col = 200, 200
+        
+        self.moveSpeed = 6
+        self.zoomSpeed = 1.1
         
         # Array to hold iteration count for each pixel
         self.data = np.zeros(self.xsize*self.ysize, dtype = np.int32)
@@ -63,15 +66,44 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.scene().sigMouseClicked.connect(self.mouseEvent)
         
         # Dictionary with functions to call at keypress
-        self.keyList = {
-                        QtCore.Qt.Key_R: self.createFractal,
-                        QtCore.Qt.Key_E: self.zoomIn,
-                        QtCore.Qt.Key_Q: self.zoomOut,
-                        QtCore.Qt.Key_A: self.moveL,
-                        QtCore.Qt.Key_D: self.moveR,
-                        QtCore.Qt.Key_S: self.moveD,
-                        QtCore.Qt.Key_W: self.moveU
-                        }
+        self.staticKeyList = {
+                              QtCore.Qt.Key_R: self.createFractal
+                             }
+        
+        self.movementKeyList = {
+                                QtCore.Qt.Key_E: self.zoomIn,
+                                QtCore.Qt.Key_Q: self.zoomOut,
+                                QtCore.Qt.Key_A: self.moveL,
+                                QtCore.Qt.Key_D: self.moveR,
+                                QtCore.Qt.Key_S: self.moveD,
+                                QtCore.Qt.Key_W: self.moveU
+                               }
+        
+        self.pressedKeys = set()
+        
+        # Timer which calls update function at const framerate
+        self.tickRate = 1000 / 30
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.move)
+        self.timer.start(self.tickRate)
+        
+        # Init fps counter
+        self.fps = 1000 / self.tickRate
+        self.lastTime = time()
+        self.timer.timeout.connect(self.fpsCounter)
+    
+    # Calculates current fps
+    def fpsCounter(self):
+        self.now = time()
+        dt = self.now - self.lastTime
+        self.lastTime = self.now
+        s = np.clip(dt*2., 0, 1)
+        self.fps = self.fps * (1-s) + (1.0/dt) * s
+    
+    # Called every tick. Calls move functions
+    def move(self):
+        for key in self.pressedKeys:
+            self.movementKeyList.get(key, self.doNothing)()
     
     # Empty function to call if any other key is pressed
     def doNothing(self):
@@ -82,7 +114,14 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         if e.isAutoRepeat():
             pass
         else:
-            self.keyList.get(e.key(), self.doNothing)()
+            self.pressedKeys.add(e.key())
+            self.staticKeyList.get(e.key(), self.doNothing)()
+    
+    def keyReleaseEvent(self, e):
+        if e.isAutoRepeat():
+            pass
+        else:
+            self.pressedKeys.remove(e.key())
     
     # Takes mouse click and zooms in or out at position
     def mouseEvent(self, e):
@@ -107,39 +146,27 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.updateImage()
     
     def zoomIn(self):
-        st = time()
-        self.fractal.zoom(.5)
-        print("Image calculated in %.6f s" %(time() - st))
+        self.fractal.zoom(1.0/self.zoomSpeed)
         self.updateImage()
     
     def zoomOut(self):
-        st = time()
-        self.fractal.zoom(2.0)
-        print("Image calculated in %.6f s" %(time() - st))
+        self.fractal.zoom(self.zoomSpeed)
         self.updateImage()
         
     def moveL(self):
-        st = time()
-        self.fractal.moveL(self.xsize//32)
-        print("Image calculated in %.6f s" %(time() - st))
+        self.fractal.moveL(self.moveSpeed)
         self.updateImage()
     
     def moveR(self):
-        st = time()
-        self.fractal.moveR(self.xsize//32)
-        print("Image calculated in %.6f s" %(time() - st))
+        self.fractal.moveR(self.moveSpeed)
         self.updateImage()
     
     def moveD(self):
-        st = time()
-        self.fractal.moveD(self.ysize//32)
-        print("Image calculated in %.6f s" %(time() - st))
+        self.fractal.moveD(self.moveSpeed)
         self.updateImage()
     
     def moveU(self):
-        st = time()
-        self.fractal.moveU(self.ysize//32)
-        print("Image calculated in %.6f s" %(time() - st))
+        self.fractal.moveU(self.moveSpeed)
         self.updateImage()
     
     def setMaxIt(self):
