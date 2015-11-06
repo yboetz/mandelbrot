@@ -11,36 +11,28 @@ from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 from time import time
 
-xmin, xmax = -2,1
-ymin, ymax =  -1.5,1.5
 #xmin, xmax = -0.7436438870576386, -0.7436438870166787
 #ymin, ymax = 0.1318259041848326, 0.1318259042257926
 
-xsize  = 1024
-ysize = 1024
-#xsize = int(ysize / (ymax - ymin) * (xmax - xmin))
+def get_color_map(filename):
+    try:
+        x = np.fromfile(filename, dtype = np.float64, sep = ' ')
+    except FileNotFoundError:
+        return None
+    x = x.reshape((x.size//3, 3))
+    x = np.append(x, x[::-1], axis = 0)
+    colmap = np.ones((len(x),4), dtype = np.float64)
+    colmap[:,:3] = x
+    return colmap
 
-# Max iterations & number of colors
-maxit, col = 200, 200
-
-# Generate look up table
-stops = np.linspace(0,1,5)
-colArr = np.array([[0, 0, 0, 1],[1, 0, 0, 1],[1, 1, 0, 1],[1, 0, 0, 1],[0, 0, 0, 1]], dtype = np.float32)
-colMap = pg.ColorMap(stops, colArr)
-lut = colMap.getLookupTable(0.0, 1.0, col)
-
-with open('viridis','r') as file:
-    x = []
-    for line in file:
-        x.append(list(map(float,line.split())))
-    x.extend(x[::-1])
-    virMap = np.ones((len(x),4), dtype = np.float32)
-    virMap[:,:3] = x
-    del x
-
-stops = np.linspace(0,1,virMap.shape[0])
-colMap = pg.ColorMap(stops, virMap)
-lut = colMap.getLookupTable(0.0, 1.0, col)
+def generate_lut(color_map = None, colors = 200):
+    if color_map is None:
+        steps = np.linspace(0,1,5)
+        color_map = np.array([[0, 0, 0, 1],[1, 0, 0, 1],[1, 1, 0, 1],[1, 0, 0, 1],[0, 0, 0, 1]],
+                             dtype = np.float64)
+    else:
+        steps = np.linspace(0, 1, color_map.shape[0])
+    return pg.ColorMap(steps, color_map).getLookupTable(0.0, 1.0, colors)
 
 
 # GraphicsLayoutWidget class with controls & fractal data
@@ -48,11 +40,17 @@ class FractalWidget(pg.GraphicsLayoutWidget):
     def __init__(self):
         super(FractalWidget, self).__init__()
         
+        self.xsize, self.ysize = 1024, 1024
+        self.xmin, self.xmax = -2,1
+        self.ymin, self.ymax =  -1.5,1.5
+        self.maxit, self.col = 200, 200
+        
         # Array to hold iteration count for each pixel
-        self.data = np.zeros(xsize*ysize, dtype = np.int32)
+        self.data = np.zeros(self.xsize*self.ysize, dtype = np.int32)
         
         # Create image item
         self.ip = pg.ImageItem(border = 'w')
+        lut = generate_lut(color_map=get_color_map('viridis'), colors=self.col)
         self.ip.setLookupTable(lut, update = False)
         self.createFractal()
         
@@ -89,61 +87,67 @@ class FractalWidget(pg.GraphicsLayoutWidget):
     # Takes mouse click and zooms in or out at position
     def mouseEvent(self, e):
         pos = self.ip.mapFromScene(e.scenePos())
-        if not (0 < pos.x() < xsize) or not (0 < pos.y() < ysize):
+        if not (0 < pos.x() < self.xsize) or not (0 < pos.y() < self.ysize):
             return
         bts = {1:self.zoomIn, 2:self.zoomOut}
         if e.button() in bts:
             self.fractal.setExtent(pos.x(), pos.y())
             bts.get(e.button())()
     
+    def updateImage(self):
+        self.ip.setImage(self.data.reshape((self.ysize,self.xsize)).transpose(),
+                         levels = (0,self.col))
+    
     def createFractal(self):
         st = time()
-        self.fractal = Mandel(xsize, ysize, xmin, xmax, ymin, ymax, maxit, col, self.data)
+        args = (self.xsize, self.ysize, self.xmin, self.xmax, self.ymin,
+                self.ymax, self.maxit, self.col, self.data)
+        self.fractal = Mandel(*args)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
     
     def zoomIn(self):
         st = time()
         self.fractal.zoom(.5)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
     
     def zoomOut(self):
         st = time()
         self.fractal.zoom(2.0)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
-    
+        self.updateImage()
+        
     def moveL(self):
         st = time()
-        self.fractal.moveL(xsize//32)
+        self.fractal.moveL(self.xsize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
     
     def moveR(self):
         st = time()
-        self.fractal.moveR(xsize//32)
+        self.fractal.moveR(self.xsize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
     
     def moveD(self):
         st = time()
-        self.fractal.moveD(ysize//32)
+        self.fractal.moveD(self.ysize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
     
     def moveU(self):
         st = time()
-        self.fractal.moveU(ysize//32)
+        self.fractal.moveU(self.ysize//32)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
     
     def setMaxIt(self):
         m = int(input("Please set number of iterations to check:\n"))
         st = time()
         self.fractal.setMaxIt(m)
         print("Image calculated in %.6f s" %(time() - st))
-        self.ip.setImage(self.data.reshape((ysize,xsize)).transpose(), levels = (0,col))
+        self.updateImage()
 
 
 # Main window, to have file menu & statusbar
@@ -154,7 +158,7 @@ class MainWindow(QtGui.QMainWindow):
         self.show()
         
     def init(self):
-        self.resize(ysize, xsize)
+        self.resize(1024, 1024)
         self.setWindowTitle('Mandelbrot')
         
         self.window = FractalWidget()
