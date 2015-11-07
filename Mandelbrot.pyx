@@ -13,6 +13,7 @@ cdef extern from "Mandelbrot.h":
         void moveD(int)
         void moveU(int)
         void setExtent(double,double)
+        double xmin, xmax, ymin, ymax
    
 
 cdef class Mandel:
@@ -48,3 +49,15 @@ cdef class Mandel:
     
     def setExtent(self, double x, double y):
         self.thisptr.setExtent(x,y)
+    
+    property xmin:
+        def __get__(self): return self.thisptr.xmin
+    
+    property xmax:
+        def __get__(self): return self.thisptr.xmax
+    
+    property ymin:
+        def __get__(self): return self.thisptr.ymin
+    
+    property ymax:
+        def __get__(self): return self.thisptr.ymax

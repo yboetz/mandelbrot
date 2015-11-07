@@ -46,7 +46,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.maxit, self.col = 200, 200
         
         self.moveSpeed = 6
-        self.zoomSpeed = 1.1
+        self.zoomSpeed = 1.05
         
         # Array to hold iteration count for each pixel
         self.data = np.zeros(self.xsize*self.ysize, dtype = np.int32)
@@ -61,6 +61,11 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         view = self.addViewBox(lockAspect = True, enableMouse = False, enableMenu = False, invertY = True)
         # Add image item to widget
         view.addItem(self.ip)
+        
+        # Create TextItem to display fps and coordinates
+        self.ti = pg.TextItem()
+        self.ti.setPos(10,self.ysize)
+        view.addItem(self.ti)
         
         # Connect mouse click event to function mouseEvent
         self.scene().sigMouseClicked.connect(self.mouseEvent)
@@ -84,13 +89,20 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         # Timer which calls update function at const framerate
         self.tickRate = 1000 / 30
         self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.move)
         self.timer.start(self.tickRate)
+        self.timer.timeout.connect(self.move)
+        self.timer.timeout.connect(self.renderText)
         
         # Init fps counter
         self.fps = 1000 / self.tickRate
         self.lastTime = time()
         self.timer.timeout.connect(self.fpsCounter)
+    
+    # Renders text to display
+    def renderText(self):
+        self.ti.setText('Fps: %.0f\tRange: (%.15f, %.15f; %.15f, %.15f)'
+                        %(self.fps, self.fractal.xmin, self.fractal.xmax,
+                          self.fractal.ymin, self.fractal.ymax))
     
     # Calculates current fps
     def fpsCounter(self):
@@ -121,7 +133,10 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         if e.isAutoRepeat():
             pass
         else:
-            self.pressedKeys.remove(e.key())
+            try:
+                self.pressedKeys.remove(e.key())
+            except KeyError:
+                pass
     
     # Takes mouse click and zooms in or out at position
     def mouseEvent(self, e):
@@ -138,11 +153,9 @@ class FractalWidget(pg.GraphicsLayoutWidget):
                          levels = (0,self.col))
     
     def createFractal(self):
-        st = time()
         args = (self.xsize, self.ysize, self.xmin, self.xmax, self.ymin,
                 self.ymax, self.maxit, self.col, self.data)
         self.fractal = Mandel(*args)
-        print("Image calculated in %.6f s" %(time() - st))
         self.updateImage()
     
     def zoomIn(self):
