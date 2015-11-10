@@ -112,7 +112,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         s = np.clip(dt*2., 0, 1)
         self.fps = self.fps * (1-s) + (1.0/dt) * s
     
-    # Called every tick. Calls move functions
+    # Calls moveX functions according to which key is pressed
     def move(self):
         for key in self.pressedKeys:
             self.movementKeyList.get(key, self.doNothing)()
@@ -121,7 +121,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
     def doNothing(self):
         pass
     
-    # Calls function according to pressed key
+    # Appends key to list when pressed
     def keyPressEvent(self, e):
         if e.isAutoRepeat():
             pass
@@ -129,6 +129,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
             self.pressedKeys.add(e.key())
             self.staticKeyList.get(e.key(), self.doNothing)()
     
+    # Removes key from list when released
     def keyReleaseEvent(self, e):
         if e.isAutoRepeat():
             pass
@@ -183,11 +184,23 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.updateImage()
     
     def setMaxIt(self):
-        m = int(input("Please set number of iterations to check:\n"))
-        st = time()
-        self.fractal.setMaxIt(m)
-        print("Image calculated in %.6f s" %(time() - st))
-        self.updateImage()
+        text, ok = QtGui.QInputDialog.getText(self, 'Iterations', 'Set number of iterations')
+        if ok:
+            try:
+                self.fractal.setMaxIt(int(text))
+                self.updateImage()
+            except ValueError:
+                pass
+    
+    def setCol(self):
+        text, ok = QtGui.QInputDialog.getText(self, 'Colors', 'Set number of colors')
+        if ok:
+            try:
+                self.fractal.setCol(int(text))
+                self.col = int(text)
+                self.updateImage()
+            except ValueError:
+                pass
 
 
 # Main window, to have file menu & statusbar
@@ -208,13 +221,22 @@ class MainWindow(QtGui.QMainWindow):
         # Menubar entries
         closeApp = QtGui.QAction(QtGui.QIcon('quit.png'), 'Quit', self)
         closeApp.setShortcut('Escape')
-        closeApp.setStatusTip('Exits application')
+        closeApp.setStatusTip('Exit application')
         closeApp.triggered.connect(pg.exit)
+        setIter = QtGui.QAction(QtGui.QIcon('quit.png'), 'Iterations', self)
+        setIter.setShortcut('I')
+        setIter.setStatusTip('Set number of iterations to calculate')
+        setIter.triggered.connect(self.window.setMaxIt)
+        setCol = QtGui.QAction(QtGui.QIcon('quit.png'), 'Colors', self)
+        setCol.setShortcut('C')
+        setCol.setStatusTip('Set number of colors')
+        setCol.triggered.connect(self.window.setCol)
         # Add menubar
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(setIter)
+        fileMenu.addAction(setCol)
         fileMenu.addAction(closeApp)
-        # Defines which function to call at what keypress
 
 
 if __name__ == "__main__":
