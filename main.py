@@ -25,7 +25,7 @@ def get_color_map(filename):
     colmap[:,:3] = x
     return colmap
 
-def generate_lut(color_map = None, colors = 200):
+def generate_lut(color_map = None, colors = 2000):
     if color_map is None:
         steps = np.linspace(0,1,5)
         color_map = np.array([[0, 0, 0, 1],[1, 0, 0, 1],[1, 1, 0, 1],[1, 0, 0, 1],[0, 0, 0, 1]],
@@ -51,15 +51,14 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         # Array to hold iteration count for each pixel
         self.data = np.zeros(self.xsize*self.ysize, dtype = np.int32)
         
-        # Create image item
-        self.ip = pg.ImageItem(border = 'w')
-        lut = generate_lut(color_map=get_color_map('viridis'), colors=self.col)
-        self.ip.setLookupTable(lut, update = False)
-        self.createFractal()
-        
         # Add view box
         view = self.addViewBox(lockAspect = True, enableMouse = False, enableMenu = False, invertY = True)
-        # Add image item to widget
+        
+        # Create image item
+        self.ip = pg.ImageItem(border = 'w')
+        lut = generate_lut(color_map=get_color_map('viridis'))
+        self.ip.setLookupTable(lut, update = False)
+        self.createFractal()
         view.addItem(self.ip)
         
         # Create TextItem to display fps and coordinates

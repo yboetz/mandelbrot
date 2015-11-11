@@ -139,7 +139,7 @@ void Mandelbrot::moveL(int step)
     if(step == 0) return;
     
     int stepSize = 4*step;
-//    if(stepSize > xsize) return;
+    if(stepSize > xsize) return;
     
     double dx = (xmax - xmin) / xsize * stepSize;
     xmin -= dx;
@@ -172,7 +172,7 @@ void Mandelbrot::moveR(int step)
     if(step == 0) return;
     
     int stepSize = 4*step;
-//    if(stepSize > xsize) return;
+    if(stepSize > xsize) return;
     
     double dx = (xmax - xmin) / xsize * stepSize;
     xmin += dx;
@@ -205,7 +205,7 @@ void Mandelbrot::moveD(int step)
     if(step == 0) return;
     
     int stepSize = 4*step;
-//    if(stepSize > xsize) return;
+    if(stepSize > xsize) return;
     
     double dy = (ymax - ymin) / ysize * stepSize;
     ymin -= dy;
@@ -245,7 +245,7 @@ void Mandelbrot::moveU(int step)
     if(step == 0) return;
     
     int stepSize = 4*step;
-//    if(stepSize > xsize) return;
+    if(stepSize > xsize) return;
     
     double dy = (ymax - ymin) / ysize * stepSize;
     ymin += dy;
