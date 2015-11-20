@@ -46,7 +46,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.maxit, self.col = 200, 200
         
         self.moveSpeed = 6
-        self.zoomSpeed = 1.05
+        self.zoomSpeed = 1.06667
         
         # Array to hold iteration count for each pixel
         self.data = np.zeros(self.xsize*self.ysize, dtype = np.int32)
@@ -73,7 +73,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         self.staticKeyList = {
                               QtCore.Qt.Key_R: self.createFractal
                              }
-        
+        # Functions which get continuously called at keypress
         self.movementKeyList = {
                                 QtCore.Qt.Key_E: self.zoomIn,
                                 QtCore.Qt.Key_Q: self.zoomOut,
@@ -82,7 +82,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
                                 QtCore.Qt.Key_S: self.moveD,
                                 QtCore.Qt.Key_W: self.moveU
                                }
-        
+        # A set of currently pressed keys
         self.pressedKeys = set()
         
         # Timer which calls update function at const framerate
