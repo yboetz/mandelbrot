@@ -220,22 +220,25 @@ class MainWindow(QtGui.QMainWindow):
         # Menubar entries
         closeApp = QtGui.QAction(QtGui.QIcon('quit.png'), 'Quit', self)
         closeApp.setShortcut('Escape')
-        closeApp.setStatusTip('Exit application')
+#        closeApp.setStatusTip('Exit application')
         closeApp.triggered.connect(pg.exit)
         setIter = QtGui.QAction(QtGui.QIcon('quit.png'), 'Iterations', self)
         setIter.setShortcut('I')
-        setIter.setStatusTip('Set number of iterations to calculate')
+#        setIter.setStatusTip('Set number of iterations to calculate')
         setIter.triggered.connect(self.window.setMaxIt)
         setCol = QtGui.QAction(QtGui.QIcon('quit.png'), 'Colors', self)
         setCol.setShortcut('C')
-        setCol.setStatusTip('Set number of colors')
+#        setCol.setStatusTip('Set number of colors')
         setCol.triggered.connect(self.window.setCol)
         # Add menubar
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(setIter)
-        fileMenu.addAction(setCol)
-        fileMenu.addAction(closeApp)
+#        menubar = self.menuBar()
+#        fileMenu = menubar.addMenu('&File')
+#        fileMenu.addAction(setIter)
+#        fileMenu.addAction(setCol)
+#        fileMenu.addAction(closeApp)
+        self.addAction(setIter)
+        self.addAction(setCol)
+        self.addAction(closeApp)
 
 
 if __name__ == "__main__":
