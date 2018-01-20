@@ -2,11 +2,11 @@
 """
 Created on Tue Mar 24 11:03:55 2015
 
-@author: somebody
+@author: yboetz
 """
 
 import numpy as np
-from Mandelbrot import Mandel
+from mandel import Mandel
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 from time import time
@@ -56,7 +56,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
         
         # Create image item
         self.ip = pg.ImageItem(border = 'w')
-        lut = generate_lut(color_map=get_color_map('viridis'))
+        lut = generate_lut(color_map=get_color_map('../viridis'))
         self.ip.setLookupTable(lut, update = False)
         self.createFractal()
         view.addItem(self.ip)
