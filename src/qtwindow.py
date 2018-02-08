@@ -37,7 +37,7 @@ class FractalWidget(pg.GraphicsLayoutWidget):
 
         # Create image item
         self.ip = pg.ImageItem(border='w')
-        lut = generate_lut(color_map=get_color_map('../viridis'))
+        lut = generate_lut(color_map=get_color_map(os.path.dirname(os.path.abspath(__file__)) + '/../viridis'))
         self.ip.setLookupTable(lut, update=False)
         self.createFractal()
         view.addItem(self.ip)
