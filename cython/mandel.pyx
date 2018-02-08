@@ -2,7 +2,7 @@ import numpy as np
 cimport numpy as np
 from libcpp cimport bool
 
-cdef extern from "mandelbrot.cpp":
+cdef extern from "../src/mandelbrot.cpp":
     cdef cppclass Mandelbrot:
         Mandelbrot(int, int, double, double, double, double, int, int, int*) except +
         void setMaxIt(int)

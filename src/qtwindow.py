@@ -5,12 +5,15 @@ Created on Sat Jan 20 10:30:47 2018
 @author: yboetz
 """
 
+import os
+import sys
 from time import time
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-from mandel import Mandel
 from utils import get_color_map, generate_lut
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../cython')
+from mandel import Mandel
 
 
 class FractalWidget(pg.GraphicsLayoutWidget):
