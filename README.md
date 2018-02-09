@@ -1,7 +1,7 @@
 # README #
 
 This is a simulation calculating the [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set).
-Number crunching code is written in C++, leveraging OpenMP and AVX instructions for high performance.
+Number crunching code is written in C++, leveraging OpenMP and SSE/AVX instructions for high performance.
 This is then called in Python via Cython and visualized using pyqtgraph.
 
 
@@ -35,7 +35,7 @@ Compile the C++ code with
 
 Finally start the widget
 
-	python main.py
+	python src/main.py
 
 
 #### Key controls ####
